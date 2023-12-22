@@ -1,0 +1,23 @@
+{
+  "roles": [
+    {
+      "name": "admin",
+      "describe": "super user role",
+      "permissions": [
+        "create_user", "update_user_profile"]
+    },
+    {
+      "name": "client",
+      "describe": "client permission",
+      "permissions": [
+        "update_user_profile"
+      ]
+    }
+  ],
+  "permissions": [
+    {
+      "name": "create_user",
+      "describe": "permission to create user"
+    }
+  ]
+}
