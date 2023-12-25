@@ -51,9 +51,8 @@ func main() {
 		if err != nil {
 			return
 		}
+		api.GlobalSetup(server, db)
 	}
-
-	api.GlobalSetup(server, db)
 
 	server.GET("/swagger/*", echoSwagger.WrapHandler)
 	err = server.Start(":8000")

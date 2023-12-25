@@ -33,7 +33,7 @@ func (r *UserRepository) GetAllUsers() ([]model.User, error) {
 // GetUserById récupère un utilisateur basé sur l'ID depuis la base de données
 func (r *UserRepository) GetUserById(id string) (model.User, error) {
 	var user model.User
-	if err := r.db.First(&user, id).Error; err != nil {
+	if err := r.db.Model(model.User{}).First(&user, "id = ?", id).Error; err != nil {
 		return model.User{}, err
 	}
 	return user, nil
@@ -94,7 +94,7 @@ func (r *UserRepository) GetUserByRole(role string) ([]model.User, error) {
 // GetUserByUsername récupère un utilisateur par son nom d'utilisateur depuis la base de données
 func (r *UserRepository) GetUserByUsername(username string) (model.User, error) {
 	var user model.User
-	if err := r.db.Where("username = ?", username).First(&user).Error; err != nil {
+	if err := r.db.Model(model.User{}).First(&user, "username = ?", username).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return model.User{}, errors.New("utilisateur non trouvé")
 		}

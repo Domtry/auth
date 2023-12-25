@@ -24,6 +24,68 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
+        "/auth/login": {
+            "post": {
+                "description": "Authentifier un utlisateur",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Authentications"
+                ],
+                "summary": "Authentifier un utlisateur",
+                "parameters": [
+                    {
+                        "description": "Détails de l'utilisateur",
+                        "name": "user",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/authentications.AuthIn"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/authentications.AuthOut"
+                        }
+                    }
+                }
+            }
+        },
+        "/auth/me": {
+            "get": {
+                "description": "Voir le profil d'un utilisateur",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Authentications"
+                ],
+                "summary": "Voir le profil d'un utilisateur",
+                "parameters": [
+                    {
+                        "description": "Détails de l'utilisateur",
+                        "name": "user",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/model.User"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/model.User"
+                        }
+                    }
+                }
+            }
+        },
         "/users": {
             "get": {
                 "description": "Récupère la liste de tous les utilisateurs.",
@@ -31,7 +93,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "users"
+                    "Users"
                 ],
                 "summary": "Récupère tous les utilisateurs",
                 "responses": {
@@ -55,7 +117,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "users"
+                    "Users"
                 ],
                 "summary": "Crée un nouvel utilisateur",
                 "parameters": [
@@ -86,12 +148,12 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "users"
+                    "Users"
                 ],
                 "summary": "Récupère un utilisateur par ID",
                 "parameters": [
                     {
-                        "type": "integer",
+                        "type": "string",
                         "description": "ID de l'utilisateur",
                         "name": "id",
                         "in": "path",
@@ -116,7 +178,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "users"
+                    "Users"
                 ],
                 "summary": "Met à jour un utilisateur",
                 "parameters": [
@@ -149,7 +211,7 @@ const docTemplate = `{
             "delete": {
                 "description": "Supprime un utilisateur en fonction de son ID.",
                 "tags": [
-                    "users"
+                    "Users"
                 ],
                 "summary": "Supprime un utilisateur",
                 "parameters": [
@@ -172,7 +234,7 @@ const docTemplate = `{
             "post": {
                 "description": "Assigner un rôle spécifié à un utilisateur en fonction de son ID.",
                 "tags": [
-                    "users"
+                    "Users"
                 ],
                 "summary": "Assigner un rôle à un utilisateur",
                 "parameters": [
@@ -202,7 +264,7 @@ const docTemplate = `{
             "post": {
                 "description": "Supprimer un rôle spécifié d'un utilisateur en fonction de son ID.",
                 "tags": [
-                    "users"
+                    "Users"
                 ],
                 "summary": "Supprimer un rôle d'un utilisateur",
                 "parameters": [
@@ -230,6 +292,52 @@ const docTemplate = `{
         }
     },
     "definitions": {
+        "authentications.AuthIn": {
+            "type": "object",
+            "required": [
+                "password",
+                "username"
+            ],
+            "properties": {
+                "password": {
+                    "type": "string"
+                },
+                "username": {
+                    "type": "string"
+                }
+            }
+        },
+        "authentications.AuthOut": {
+            "type": "object",
+            "properties": {
+                "email": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "token": {
+                    "$ref": "#/definitions/authentications.Token"
+                },
+                "user_id": {
+                    "type": "string"
+                }
+            }
+        },
+        "authentications.Token": {
+            "type": "object",
+            "properties": {
+                "access_token": {
+                    "type": "string"
+                },
+                "expires_at": {
+                    "type": "string"
+                },
+                "refresh_token": {
+                    "type": "string"
+                }
+            }
+        },
         "model.User": {
             "type": "object",
             "required": [

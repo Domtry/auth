@@ -2,8 +2,8 @@ package config
 
 import (
 	"auth/model"
+	"auth/utils"
 	"fmt"
-
 	"github.com/google/uuid"
 
 	"gorm.io/driver/mysql"
@@ -41,8 +41,8 @@ func GetDB(config DbConfig) (*gorm.DB, error) {
 
 func CreateUpdateTable(db *gorm.DB) error {
 	return db.AutoMigrate(
-		&model.User{},
 		&model.Role{},
+		&model.User{},
 		&model.Permission{},
 		&model.RolePermission{},
 	)
@@ -126,7 +126,32 @@ func InitSystem(db *gorm.DB) error {
 		db.Commit()
 	}
 
-	if err := db.Model(model.User{}).Where("").Error; err != nil {
-	}
+	createSystemSuperUser(db, adminRoleModel)
 	return nil
+}
+
+func createSystemSuperUser(db *gorm.DB, adminRoleModel model.Role) {
+	var user model.User
+
+	tx := db.Model(model.User{}).Find(&user, "email = ?", "noreply@cmagic.com")
+	if tx.Error != nil {
+		fmt.Println("Error creating user Error :> ", tx.Error)
+	}
+
+	if user.Id == "" {
+		adminPassword, _ := utils.GenerateHashPassword("Dycode@123456")
+		user = model.User{
+			Name:     "admin",
+			Email:    "noreply@cmagic.com",
+			Sername:  "admin",
+			Username: "admin",
+			Password: adminPassword,
+			RoleId:   adminRoleModel.Id,
+		}
+		tx := db.Create(&user)
+		if tx.Error != nil {
+			fmt.Println("Error creating user Error :> ", tx.Error)
+		}
+		db.Commit()
+	}
 }

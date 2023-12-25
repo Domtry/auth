@@ -1,6 +1,7 @@
 package api
 
 import (
+	"auth/api/authentications"
 	"auth/api/users"
 
 	"github.com/labstack/echo/v4"
@@ -10,4 +11,5 @@ import (
 func GlobalSetup(ech *echo.Echo, db *gorm.DB) {
 	apiGroup := ech.Group("/api/v1")
 	users.SetupUser(apiGroup, db)
+	authentications.SetupAuthentication(apiGroup, db)
 }

@@ -1,0 +1,19 @@
+POST http://localhost:8000/api/v1/auth/login
+Content-Type: application/json
+
+{
+  "username": "admin",
+  "password": "Dycode@123456"
+}
+
+###
+
+GET http://localhost:8000/api/v1/users
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiYWRtaW4iLCJzb3VyY2UiOiJhY2Nlc3NfdG9rZW4iLCJleHAiOjE3MDM1MDI3NDMsImp0aSI6ImRkOTE2MzFkLWU0MDktNGViYy05Mzk2LTdlZDUzNzBmNjMxZSIsInN1YiI6Im5vcmVwbHlAY21hZ2ljLmNvbSJ9.2diPpcOmTwJMgUfhbDuJilUkFaloYpok0kqoOGl3S68
+
+###
+
+GET http://localhost:8000/api/v1/auth/me
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiYWRtaW4iLCJzb3VyY2UiOiJhY2Nlc3NfdG9rZW4iLCJleHAiOjE3MDM1MDI3NDMsImp0aSI6ImRkOTE2MzFkLWU0MDktNGViYy05Mzk2LTdlZDUzNzBmNjMxZSIsInN1YiI6Im5vcmVwbHlAY21hZ2ljLmNvbSJ9.2diPpcOmTwJMgUfhbDuJilUkFaloYpok0kqoOGl3S68

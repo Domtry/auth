@@ -27,11 +27,12 @@ func NewUserHandler(userService *service.UserService) *UserHandler {
 // GetAllUsersHandler gère la requête pour récupérer tous les utilisateurs
 // @Summary Récupère tous les utilisateurs
 // @Description Récupère la liste de tous les utilisateurs.
-// @Tags users
+// @Tags Users
 // @Produce json
 // @Success 200 {array} model.User
 // @Router /users [get]
 func (h *UserHandler) GetAllUsersHandler(c echo.Context) error {
+
 	users, err := h.userService.GetAllUsers()
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, err.Error())
@@ -43,12 +44,13 @@ func (h *UserHandler) GetAllUsersHandler(c echo.Context) error {
 // GetUserByIdHandler gère la requête pour récupérer un utilisateur par son ID
 // @Summary Récupère un utilisateur par ID
 // @Description Récupère un utilisateur en fonction de son ID.
-// @Tags users
+// @Tags Users
 // @Produce json
-// @Param id path int true "ID de l'utilisateur"
+// @Param id path string true "ID de l'utilisateur"
 // @Success 200 {object} model.User
 // @Router /users/{id} [get]
 func (h *UserHandler) GetUserByIdHandler(c echo.Context) error {
+
 	userId := c.Param("id")
 	if userId == "" {
 		return c.JSON(http.StatusBadRequest, "ID invalid")
@@ -68,7 +70,7 @@ func (h *UserHandler) GetUserByIdHandler(c echo.Context) error {
 // CreateUserHandler gère la requête pour créer un nouvel utilisateur
 // @Summary Crée un nouvel utilisateur
 // @Description Crée un nouvel utilisateur avec les détails fournis.
-// @Tags users
+// @Tags Users
 // @Accept json
 // @Produce json
 // @Param user body model.User true "Détails de l'utilisateur"
@@ -108,7 +110,7 @@ func (h *UserHandler) CreateUserHandler(c echo.Context) error {
 // UpdateUserHandler gère la requête pour mettre à jour un utilisateur
 // @Summary Met à jour un utilisateur
 // @Description Met à jour un utilisateur en fonction de son ID avec les détails fournis.
-// @Tags users
+// @Tags Users
 // @Accept json
 // @Produce json
 // @Param id path int true "ID de l'utilisateur"
@@ -143,7 +145,7 @@ func (h *UserHandler) UpdateUserHandler(c echo.Context) error {
 // DeleteUserHandler gère la requête pour supprimer un utilisateur
 // @Summary Supprime un utilisateur
 // @Description Supprime un utilisateur en fonction de son ID.
-// @Tags users
+// @Tags Users
 // @Param id path int true "ID de l'utilisateur"
 // @Success 204 "Aucun contenu"
 // @Router /users/{id} [delete]
@@ -164,7 +166,7 @@ func (h *UserHandler) DeleteUserHandler(c echo.Context) error {
 // AssignRoleHandler gère la requête pour assigner un rôle à un utilisateur
 // @Summary Assigner un rôle à un utilisateur
 // @Description Assigner un rôle spécifié à un utilisateur en fonction de son ID.
-// @Tags users
+// @Tags Users
 // @Param id path int true "ID de l'utilisateur"
 // @Param role path string true "Rôle à assigner"
 // @Success 204 "Aucun contenu"
@@ -194,7 +196,7 @@ func (h *UserHandler) AssignRoleHandler(c echo.Context) error {
 // RemoveRoleHandler gère la requête pour supprimer un rôle d'un utilisateur
 // @Summary Supprimer un rôle d'un utilisateur
 // @Description Supprimer un rôle spécifié d'un utilisateur en fonction de son ID.
-// @Tags users
+// @Tags Users
 // @Param id path int true "ID de l'utilisateur"
 // @Param role path string true "Rôle à supprimer"
 // @Success 204 "Aucun contenu"

@@ -1,9 +1,12 @@
 package users
 
-import "github.com/labstack/echo/v4"
+import (
+	"auth/middlewares"
+	"github.com/labstack/echo/v4"
+)
 
 func RegisterUserRoutes(apiGroup *echo.Group, handler *UserHandler) {
-	apiGroup.GET("", handler.GetAllUsersHandler)
+	apiGroup.GET("", handler.GetAllUsersHandler, middlewares.IsAdminMiddle)
 	apiGroup.POST("", handler.CreateUserHandler)
 	apiGroup.PUT("/:id", handler.UpdateUserHandler)
 	apiGroup.GET("/:id", handler.GetUserByIdHandler)

@@ -1,6 +1,6 @@
-DB_PROVIDER: sqlite
+DB_PROVIDER: pg
 DB_HOST: localhost
-DB_PORT: 8080
+DB_PORT: 5433
 DB_NAME: cmagic_auth_db_test
-DB_USER: Dycode
-DB_PASSWORD: DyC@de
+DB_USER: dycode_db_user
+DB_PASSWORD: DyCode123456
