@@ -2,7 +2,6 @@ package repository
 
 import (
 	"auth/model"
-	"errors"
 	"fmt"
 	"log"
 	"time"
@@ -24,8 +23,10 @@ func NewUserRepository(db *gorm.DB) *UserRepository {
 // GetAllUsers récupère tous les utilisateurs depuis la base de données
 func (r *UserRepository) GetAllUsers() ([]model.User, error) {
 	var users []model.User
-	if err := r.db.Find(&users).Error; err != nil {
-		return nil, err
+	tx := r.db.Model(model.User{}).
+		Where("is_visible = ?", true).Find(&users)
+	if tx.Error != nil {
+		return nil, tx.Error
 	}
 	return users, nil
 }
@@ -33,8 +34,10 @@ func (r *UserRepository) GetAllUsers() ([]model.User, error) {
 // GetUserById récupère un utilisateur basé sur l'ID depuis la base de données
 func (r *UserRepository) GetUserById(id string) (model.User, error) {
 	var user model.User
-	if err := r.db.Model(model.User{}).First(&user, "id = ?", id).Error; err != nil {
-		return model.User{}, err
+	tx := r.db.Model(model.User{}).
+		First(&user, "id = ? and is_visible = ?", id, true)
+	if tx.Error != nil {
+		return model.User{}, tx.Error
 	}
 	return user, nil
 }
@@ -58,12 +61,11 @@ func (r *UserRepository) CreateUser(newUser model.User) (model.User, error) {
 
 // UpdateUser met à jour un utilisateur dans la base de données
 func (r *UserRepository) UpdateUser(updatedUser model.User) (model.User, error) {
-	// Générez la date actuelle pour le champ modifié
 	updatedUser.UpdatedAt = time.Now()
-
-	// Mise à jour dans la base de données
-	if err := r.db.Save(&updatedUser).Error; err != nil {
-		return model.User{}, err
+	tx := r.db.Model(model.User{}).
+		Where("id = ? and is_visible = ?", updatedUser.Id, true).Save(&updatedUser)
+	if tx.Error != nil {
+		return model.User{}, tx.Error
 	}
 
 	msg := fmt.Sprintf("Updated user with ID %v and new role %v", updatedUser.Id, updatedUser.RoleId)
@@ -82,23 +84,42 @@ func (r *UserRepository) DeleteUser(id string) error {
 	return nil
 }
 
-// GetUserByRole récupère tous les utilisateurs avec un rôle spécifié depuis la base de données
+// DeleteUser supprime un utilisateur de la base de données
+func (r *UserRepository) ArchivedUser(user model.User) error {
+	// Suppression dans la base de données
+	_, err := r.UpdateUser(user)
+	return err
+}
+
+// GetUserByRole récupère tous les utilisateurs avec un rôle spécifié
 func (r *UserRepository) GetUserByRole(role string) ([]model.User, error) {
 	var users []model.User
-	if err := r.db.Where("role = ?", role).Find(&users).Error; err != nil {
-		return nil, err
+	tx := r.db.Model(model.User{}).Where(
+		"role = ? and is_visible = ?", role, true).Find(&users)
+	if tx.Error != nil {
+		return nil, tx.Error
 	}
 	return users, nil
 }
 
-// GetUserByUsername récupère un utilisateur par son nom d'utilisateur depuis la base de données
+// GetUserByUsername récupère un utilisateur par son nom
 func (r *UserRepository) GetUserByUsername(username string) (model.User, error) {
 	var user model.User
-	if err := r.db.Model(model.User{}).First(&user, "username = ?", username).Error; err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return model.User{}, errors.New("utilisateur non trouvé")
-		}
-		return model.User{}, err
+	tx := r.db.Model(model.User{}).
+		First(&user, "username = ? and is_visible = ?", username, true)
+	if tx.Error != nil {
+		return model.User{}, tx.Error
+	}
+	return user, nil
+}
+
+// GetUserByEmail récupère un utilisateur par son email
+func (r *UserRepository) GetUserByEmail(email string) (model.User, error) {
+	var user model.User
+	tx := r.db.Model(model.User{}).
+		First(&user, "email = ? and is_visible = ?", email, true)
+	if tx.Error != nil {
+		return model.User{}, tx.Error
 	}
 	return user, nil
 }

@@ -2,7 +2,9 @@ package utils
 
 import (
 	"auth/model"
+	"fmt"
 	"github.com/dgrijalva/jwt-go"
+	"github.com/labstack/echo/v4"
 	"golang.org/x/crypto/bcrypt"
 	"strings"
 )
@@ -41,4 +43,25 @@ func ParseToken(tokenString string) (claims *model.Claims, err error) {
 	}
 
 	return claims, nil
+}
+
+func VerifyPermission(ctx echo.Context, value string) error {
+	roleCtx := ctx.Get("roles")
+
+	roles := roleCtx.(JsonRoleItem)
+	hasPermit := false
+
+	for i := 0; i < len(roles.Permissions); i++ {
+		permission := roles.Permissions[i]
+		if permission == value {
+			hasPermit = true
+			break
+		}
+	}
+
+	if !hasPermit {
+		return fmt.Errorf("User has not permission")
+	}
+
+	return nil
 }

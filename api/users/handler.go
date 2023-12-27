@@ -1,14 +1,13 @@
 package users
 
 import (
-	"auth/model"
 	"auth/service"
+	"auth/utils"
+	"fmt"
 	"net/http"
 	"strings"
 
 	"github.com/go-playground/validator/v10"
-	"github.com/google/uuid"
-
 	"github.com/labstack/echo/v4"
 )
 
@@ -31,14 +30,48 @@ func NewUserHandler(userService *service.UserService) *UserHandler {
 // @Produce json
 // @Success 200 {array} model.User
 // @Router /users [get]
-func (h *UserHandler) GetAllUsersHandler(c echo.Context) error {
+func (h *UserHandler) GetAllUsersHandler(ctx echo.Context) error {
 
 	users, err := h.userService.GetAllUsers()
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, err.Error())
+		jsonResponse := utils.HttpResponse[any]{
+			Message:   "Aucun utilisateur trouvé",
+			Success:   false,
+			CodeError: http.StatusBadRequest,
+			Data:      nil,
+		}
+		return ctx.JSON(http.StatusBadRequest, jsonResponse)
 	}
 
-	return c.JSON(http.StatusOK, users)
+	var userList []UserOut
+
+	for i := 0; i < len(users); i++ {
+		userItem := users[i]
+		currentData := UserOut{
+			Id:        userItem.Id,
+			Name:      userItem.Name,
+			Email:     userItem.Email,
+			Role:      userItem.RoleId,
+			Sername:   userItem.Sername,
+			Username:  userItem.Username,
+			CreatedAt: userItem.CreatedAt,
+			UpdatedAt: userItem.UpdatedAt,
+		}
+
+		userList = append(userList, currentData)
+	}
+
+	if len(userList) == 0 {
+		userList = []UserOut{}
+	}
+
+	jsonResponse := utils.HttpResponse[[]UserOut]{
+		Message:   "Données récupérée avec succès",
+		Success:   true,
+		CodeError: http.StatusOK,
+		Data:      userList,
+	}
+	return ctx.JSON(http.StatusOK, jsonResponse)
 }
 
 // GetUserByIdHandler gère la requête pour récupérer un utilisateur par son ID
@@ -49,22 +82,97 @@ func (h *UserHandler) GetAllUsersHandler(c echo.Context) error {
 // @Param id path string true "ID de l'utilisateur"
 // @Success 200 {object} model.User
 // @Router /users/{id} [get]
-func (h *UserHandler) GetUserByIdHandler(c echo.Context) error {
+func (h *UserHandler) GetUserByIdHandler(ctx echo.Context) error {
 
-	userId := c.Param("id")
+	userId := ctx.Param("id")
 	if userId == "" {
-		return c.JSON(http.StatusBadRequest, "ID invalid")
+		jsonResponse := utils.HttpResponse[any]{
+			Message:   "Invalid user Id",
+			Success:   false,
+			CodeError: http.StatusBadRequest,
+			Data:      nil,
+		}
+		return ctx.JSON(http.StatusBadRequest, jsonResponse)
 	}
 
-	if _, err := uuid.Parse(userId); err != nil {
-		return c.JSON(http.StatusBadRequest, err.Error())
-	}
-
-	user, err := h.userService.GetUserById(userId)
+	userProfil, err := h.userService.GetUserById(fmt.Sprintf("%s", userId))
 	if err != nil {
-		return c.JSON(http.StatusNotFound, err.Error())
+		jsonResponse := utils.HttpResponse[any]{
+			Message:   "Ce compte n'existe dans le système",
+			Success:   false,
+			CodeError: http.StatusBadRequest,
+			Data:      nil,
+		}
+		return ctx.JSON(http.StatusBadRequest, jsonResponse)
 	}
-	return c.JSON(http.StatusOK, user)
+
+	jsonResponse := utils.HttpResponse[UserOut]{
+		Message:   "Données récupérée avec succès",
+		Success:   true,
+		CodeError: http.StatusOK,
+		Data: UserOut{
+			Id:        userProfil.Id,
+			Name:      userProfil.Name,
+			Email:     userProfil.Email,
+			Role:      userProfil.RoleId,
+			Sername:   userProfil.Sername,
+			Username:  userProfil.Username,
+			CreatedAt: userProfil.CreatedAt,
+			UpdatedAt: userProfil.UpdatedAt,
+		},
+	}
+	return ctx.JSON(http.StatusOK, jsonResponse)
+}
+
+// GetUserProfileHandler View user profile info
+// @Summary User profile
+// @Description view user profile info.
+// @Tags Users
+// @Produce json
+// @Success 200 {object} utils.HttpResponse[users.UserOut]
+// @Router /users/profile [get]
+func (h *UserHandler) GetUserProfileHandler(ctx echo.Context) error {
+
+	userId := ctx.Get("userId")
+
+	err := utils.VerifyPermission(ctx, "view_user_profile")
+	if err != nil {
+		jsonResponse := utils.HttpResponse[any]{
+			Message:   "Vous n'avez pas suffisament les droits pour continuer cette opération",
+			Success:   false,
+			CodeError: http.StatusUnauthorized,
+			Data:      nil,
+		}
+		return ctx.JSON(http.StatusBadRequest, jsonResponse)
+	}
+
+	userProfil, err := h.userService.GetUserById(fmt.Sprintf("%s", userId))
+	if err != nil {
+		jsonResponse := utils.HttpResponse[any]{
+			Message:   "Ce compte n'existe dans le système",
+			Success:   false,
+			CodeError: http.StatusBadRequest,
+			Data:      nil,
+		}
+		return ctx.JSON(http.StatusBadRequest, jsonResponse)
+	}
+
+	jsonResponse := utils.HttpResponse[UserOut]{
+		Message:   "Données récupérée avec succès",
+		Success:   true,
+		CodeError: http.StatusOK,
+		Data: UserOut{
+			Id:        userProfil.Id,
+			Name:      userProfil.Name,
+			Email:     userProfil.Email,
+			Role:      userProfil.RoleId,
+			Sername:   userProfil.Sername,
+			Username:  userProfil.Username,
+			CreatedAt: userProfil.CreatedAt,
+			UpdatedAt: userProfil.UpdatedAt,
+		},
+	}
+	return ctx.JSON(http.StatusOK, jsonResponse)
 }
 
 // CreateUserHandler gère la requête pour créer un nouvel utilisateur
@@ -73,19 +181,37 @@ func (h *UserHandler) GetUserByIdHandler(c echo.Context) error {
 // @Tags Users
 // @Accept json
 // @Produce json
-// @Param user body model.User true "Détails de l'utilisateur"
-// @Success 201 {object} model.User
+// @Param user body UserIn true "Body data"
+// @Success 201 {object} utils.HttpResponse[UserOut]
 // @Router /users [post]
-func (h *UserHandler) CreateUserHandler(c echo.Context) error {
+func (h *UserHandler) CreateUserHandler(ctx echo.Context) error {
 
-	var newUser model.User
-	if err := c.Bind(&newUser); err != nil {
-		return c.JSON(http.StatusBadRequest, "Données JSON invalides")
+	var payload UserIn
+
+	err := utils.VerifyPermission(ctx, "create_user")
+	if err != nil {
+		jsonResponse := utils.HttpResponse[any]{
+			Message:   "Vous n'avez pas suffisament les droits pour continuer cette opération",
+			Success:   false,
+			CodeError: http.StatusUnauthorized,
+			Data:      nil,
+		}
+		return ctx.JSON(http.StatusBadRequest, jsonResponse)
+	}
+
+	if err := ctx.Bind(&payload); err != nil {
+		jsonResponse := utils.HttpResponse[any]{
+			Message:   "Données JSON invalides",
+			Success:   false,
+			CodeError: http.StatusBadRequest,
+			Data:      nil,
+		}
+		return ctx.JSON(http.StatusBadRequest, jsonResponse)
 	}
 
 	// Validation des données
 	validate := validator.New()
-	if err := validate.Struct(newUser); err != nil {
+	if err := validate.Struct(payload); err != nil {
 		var validationErrors []string
 
 		// Parcourez les erreurs de validation
@@ -93,18 +219,44 @@ func (h *UserHandler) CreateUserHandler(c echo.Context) error {
 			validationErrors = append(validationErrors, formatValidationError(err))
 		}
 
-		return c.JSON(http.StatusBadRequest, map[string]interface{}{
-			"error":   "Validation failed",
-			"details": validationErrors,
-		})
+		jsonResponse := utils.HttpResponse[any]{
+			Message:   "Données JSON invalides",
+			Success:   false,
+			CodeError: http.StatusBadRequest,
+			Data:      validationErrors,
+		}
+		return ctx.JSON(http.StatusBadRequest, jsonResponse)
 	}
+
+	newUser := service.User(payload)
 
 	createdUser, err := h.userService.CreateUser(newUser)
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, err.Error())
+		jsonResponse := utils.HttpResponse[any]{
+			Message:   err.Error(),
+			Success:   false,
+			CodeError: http.StatusUnprocessableEntity,
+			Data:      nil,
+		}
+		return ctx.JSON(http.StatusUnprocessableEntity, jsonResponse)
 	}
 
-	return c.JSON(http.StatusCreated, createdUser)
+	jsonResponse := utils.HttpResponse[UserOut]{
+		Message:   "User has been created",
+		Success:   true,
+		CodeError: http.StatusCreated,
+		Data: UserOut{
+			Id:        createdUser.Id,
+			Username:  createdUser.Username,
+			Email:     createdUser.Email,
+			Role:      createdUser.RoleId,
+			Sername:   createdUser.Sername,
+			Name:      createdUser.Name,
+			CreatedAt: createdUser.CreatedAt,
+		},
+	}
+
+	return ctx.JSON(http.StatusCreated, jsonResponse)
 }
 
 // UpdateUserHandler gère la requête pour mettre à jour un utilisateur
@@ -113,33 +265,257 @@ func (h *UserHandler) CreateUserHandler(c echo.Context) error {
 // @Tags Users
 // @Accept json
 // @Produce json
-// @Param id path int true "ID de l'utilisateur"
-// @Param user body model.User true "Détails de l'utilisateur à mettre à jour"
-// @Success 200 {object} model.User
-// @Router /users/{id} [put]
-func (h *UserHandler) UpdateUserHandler(c echo.Context) error {
-	userId := c.Param("id")
-	if userId != "" {
-		return c.JSON(http.StatusBadRequest, "ID invalide")
-	}
+// @Param user body UserIn true "Détails de l'utilisateur à mettre à jour"
+// @Success 200 {object} utils.HttpResponse[UserOut]
+// @Router /users [put]
+func (h *UserHandler) UpdateUserHandler(ctx echo.Context) error {
 
-	if _, err := uuid.Parse(userId); err != nil {
-		return c.JSON(http.StatusBadRequest, err.Error())
-	}
+	userId := ctx.Get("userId")
 
-	var updatedUser model.User
-	if err := c.Bind(&updatedUser); err != nil {
-		return c.JSON(http.StatusBadRequest, "Données JSON invalides")
-	}
-
-	updatedUser.Id = string(userId)
-
-	updatedUser, err := h.userService.UpdateUser(updatedUser)
+	err := utils.VerifyPermission(ctx, "update_user_profile")
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, err.Error())
+		jsonResponse := utils.HttpResponse[any]{
+			Message:   "Vous n'avez pas suffisament les droits pour continuer cette opération",
+			Success:   false,
+			CodeError: http.StatusUnauthorized,
+			Data:      nil,
+		}
+		return ctx.JSON(http.StatusBadRequest, jsonResponse)
 	}
 
-	return c.JSON(http.StatusOK, updatedUser)
+	var payload UpdateUserIn
+	if err := ctx.Bind(&payload); err != nil {
+		jsonResponse := utils.HttpResponse[any]{
+			Message:   "Données JSON invalides",
+			Success:   false,
+			CodeError: http.StatusBadRequest,
+			Data:      nil,
+		}
+		return ctx.JSON(http.StatusBadRequest, jsonResponse)
+	}
+
+	// Validation des données
+	validate := validator.New()
+	if err := validate.Struct(payload); err != nil {
+		var validationErrors []string
+
+		for _, err := range err.(validator.ValidationErrors) {
+			validationErrors = append(validationErrors, formatValidationError(err))
+		}
+
+		jsonResponse := utils.HttpResponse[any]{
+			Message:   "Données JSON invalides",
+			Success:   false,
+			CodeError: http.StatusBadRequest,
+			Data:      validationErrors,
+		}
+		return ctx.JSON(http.StatusBadRequest, jsonResponse)
+	}
+
+	existingUser, err := h.userService.GetUserById(fmt.Sprintf("%s", userId))
+	if err != nil {
+		jsonResponse := utils.HttpResponse[any]{
+			Message:   "Ce compte n'existe dans le système",
+			Success:   false,
+			CodeError: http.StatusBadRequest,
+			Data:      nil,
+		}
+		return ctx.JSON(http.StatusBadRequest, jsonResponse)
+	}
+
+	if payload.Name != existingUser.Name {
+		existingUser.Name = payload.Name
+	}
+
+	if payload.Sername != existingUser.Sername {
+		existingUser.Sername = payload.Sername
+	}
+
+	if payload.Email != existingUser.Email {
+		_, err = h.userService.GetUserByEmail(payload.Email)
+		if err == nil {
+			jsonResponse := utils.HttpResponse[any]{
+				Message:   "Ce email a déjà été utilisé",
+				Success:   false,
+				CodeError: http.StatusBadRequest,
+				Data:      nil,
+			}
+			return ctx.JSON(http.StatusBadRequest, jsonResponse)
+		}
+
+		existingUser.Name = payload.Name
+	}
+
+	newUser := service.User{
+		Name:     existingUser.Name,
+		Email:    existingUser.Email,
+		Sername:  existingUser.Sername,
+		Username: existingUser.Username,
+		Password: existingUser.Password,
+	}
+
+	updateUserResponse, err := h.userService.UpdateUser(newUser)
+	if err != nil {
+		jsonResponse := utils.HttpResponse[any]{
+			Message:   err.Error(),
+			Success:   false,
+			CodeError: http.StatusUnprocessableEntity,
+			Data:      nil,
+		}
+		return ctx.JSON(http.StatusUnprocessableEntity, jsonResponse)
+	}
+
+	jsonResponse := utils.HttpResponse[UserOut]{
+		Message:   "Compte utilisateur mise à jour avec succès",
+		Success:   true,
+		CodeError: http.StatusAccepted,
+		Data: UserOut{
+			Id:        updateUserResponse.Id,
+			Name:      updateUserResponse.Name,
+			Email:     updateUserResponse.Email,
+			Sername:   updateUserResponse.Sername,
+			Username:  updateUserResponse.Username,
+			CreatedAt: updateUserResponse.CreatedAt,
+			UpdatedAt: updateUserResponse.UpdatedAt,
+			Role:      updateUserResponse.RoleId,
+		},
+	}
+	return ctx.JSON(http.StatusAccepted, jsonResponse)
+}
+
+// UpdateUserByIdHandler gère la requête pour mettre à jour un utilisateur
+// @Summary Met à jour un utilisateur
+// @Description Met à jour un utilisateur en fonction de son ID avec les détails fournis.
+// @Tags Users
+// @Accept json
+// @Produce json
+// @Param id path string true "ID de l'utilisateur"
+// @Param user body UserIn true "Body data"
+// @Success 200 {object} utils.HttpResponse[UserOut]
+// @Router /users/{id} [put]
+func (h *UserHandler) UpdateUserByIdHandler(ctx echo.Context) error {
+
+	userId := ctx.Param("id")
+
+	err := utils.VerifyPermission(ctx, "update_user_profile")
+	if err != nil {
+		jsonResponse := utils.HttpResponse[any]{
+			Message:   "Vous n'avez pas suffisament les droits pour continuer cette opération",
+			Success:   false,
+			CodeError: http.StatusUnauthorized,
+			Data:      nil,
+		}
+		return ctx.JSON(http.StatusBadRequest, jsonResponse)
+	}
+
+	if userId == "" {
+		jsonResponse := utils.HttpResponse[any]{
+			Message:   "Invalid user Id",
+			Success:   false,
+			CodeError: http.StatusBadRequest,
+			Data:      nil,
+		}
+		return ctx.JSON(http.StatusBadRequest, jsonResponse)
+	}
+
+	var payload UpdateUserIn
+	if err := ctx.Bind(&payload); err != nil {
+		jsonResponse := utils.HttpResponse[any]{
+			Message:   "Données JSON invalides",
+			Success:   false,
+			CodeError: http.StatusBadRequest,
+			Data:      nil,
+		}
+		return ctx.JSON(http.StatusBadRequest, jsonResponse)
+	}
+
+	// Validation des données
+	validate := validator.New()
+	if err := validate.Struct(payload); err != nil {
+		var validationErrors []string
+
+		for _, err := range err.(validator.ValidationErrors) {
+			validationErrors = append(validationErrors, formatValidationError(err))
+		}
+
+		jsonResponse := utils.HttpResponse[any]{
+			Message:   "Données JSON invalides",
+			Success:   false,
+			CodeError: http.StatusBadRequest,
+			Data:      validationErrors,
+		}
+		return ctx.JSON(http.StatusBadRequest, jsonResponse)
+	}
+
+	existingUser, err := h.userService.GetUserById(fmt.Sprintf("%s", userId))
+	if err != nil {
+		jsonResponse := utils.HttpResponse[any]{
+			Message:   "Ce compte n'existe dans le système",
+			Success:   false,
+			CodeError: http.StatusBadRequest,
+			Data:      nil,
+		}
+		return ctx.JSON(http.StatusBadRequest, jsonResponse)
+	}
+
+	if payload.Name != existingUser.Name {
+		existingUser.Name = payload.Name
+	}
+
+	if payload.Sername != existingUser.Sername {
+		existingUser.Sername = payload.Sername
+	}
+
+	if payload.Email != existingUser.Email {
+		_, err = h.userService.GetUserByEmail(payload.Email)
+		if err == nil {
+			jsonResponse := utils.HttpResponse[any]{
+				Message:   "Ce email a déjà été utilisé",
+				Success:   false,
+				CodeError: http.StatusBadRequest,
+				Data:      nil,
+			}
+			return ctx.JSON(http.StatusBadRequest, jsonResponse)
+		}
+
+		existingUser.Email = payload.Email
+	}
+
+	newUser := service.User{
+		Name:     existingUser.Name,
+		Email:    existingUser.Email,
+		Sername:  existingUser.Sername,
+		Username: existingUser.Username,
+		Password: existingUser.Password,
+	}
+
+	updateUserResponse, err := h.userService.UpdateUser(newUser)
+	if err != nil {
+		jsonResponse := utils.HttpResponse[any]{
+			Message:   err.Error(),
+			Success:   false,
+			CodeError: http.StatusUnprocessableEntity,
+			Data:      nil,
+		}
+		return ctx.JSON(http.StatusUnprocessableEntity, jsonResponse)
+	}
+
+	jsonResponse := utils.HttpResponse[UserOut]{
+		Message:   "Compte utilisateur mise à jour avec succès",
+		Success:   true,
+		CodeError: http.StatusAccepted,
+		Data: UserOut{
+			Id:        updateUserResponse.Id,
+			Name:      updateUserResponse.Name,
+			Email:     updateUserResponse.Email,
+			Sername:   updateUserResponse.Sername,
+			Username:  updateUserResponse.Username,
+			CreatedAt: updateUserResponse.CreatedAt,
+			UpdatedAt: updateUserResponse.UpdatedAt,
+			Role:      updateUserResponse.RoleId,
+		},
+	}
+	return ctx.JSON(http.StatusAccepted, jsonResponse)
 }
 
 // DeleteUserHandler gère la requête pour supprimer un utilisateur
@@ -149,18 +525,49 @@ func (h *UserHandler) UpdateUserHandler(c echo.Context) error {
 // @Param id path int true "ID de l'utilisateur"
 // @Success 204 "Aucun contenu"
 // @Router /users/{id} [delete]
-func (h *UserHandler) DeleteUserHandler(c echo.Context) error {
-	userId := c.Param("id")
-	if userId != "" {
-		return c.JSON(http.StatusBadRequest, "ID invalide")
-	}
+func (h *UserHandler) DeleteUserHandler(ctx echo.Context) error {
 
-	err := h.userService.DeleteUser(userId)
+	userId := ctx.Param("id")
+
+	err := utils.VerifyPermission(ctx, "delete_user")
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, err.Error())
+		jsonResponse := utils.HttpResponse[any]{
+			Message:   "Vous n'avez pas suffisament les droits pour continuer cette opération",
+			Success:   false,
+			CodeError: http.StatusUnauthorized,
+			Data:      nil,
+		}
+		return ctx.JSON(http.StatusBadRequest, jsonResponse)
 	}
 
-	return c.NoContent(http.StatusNoContent)
+	if userId == "" {
+		jsonResponse := utils.HttpResponse[any]{
+			Message:   "Invalid user Id",
+			Success:   false,
+			CodeError: http.StatusBadRequest,
+			Data:      nil,
+		}
+		return ctx.JSON(http.StatusBadRequest, jsonResponse)
+	}
+
+	err = h.userService.DeleteUser(userId)
+	if err != nil {
+		jsonResponse := utils.HttpResponse[any]{
+			Message:   "Invalid user Id",
+			Success:   false,
+			CodeError: http.StatusBadRequest,
+			Data:      nil,
+		}
+		return ctx.JSON(http.StatusBadRequest, jsonResponse)
+	}
+
+	jsonResponse := utils.HttpResponse[any]{
+		Message:   "User has been deleted",
+		Success:   true,
+		CodeError: http.StatusAccepted,
+		Data:      nil,
+	}
+	return ctx.JSON(http.StatusAccepted, jsonResponse)
 }
 
 // AssignRoleHandler gère la requête pour assigner un rôle à un utilisateur

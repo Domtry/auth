@@ -6,6 +6,7 @@ type Authentication struct {
 	UserId string `json:"user_id"`
 	Email  string `json:"email"`
 	Name   string `json:"name"`
+	Role   string `json:"role"`
 	Token  Token  `json:"token"`
 }
 

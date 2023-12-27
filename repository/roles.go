@@ -24,3 +24,11 @@ func (r *RoleRepository) GetRoleById(id string) (model.Role, error) {
 	}
 	return role, nil
 }
+
+func (r *RoleRepository) GetRoleByName(roleName string) (model.Role, error) {
+	var role model.Role
+	if err := r.db.Model(model.Role{}).First(&role, "name = ?", roleName).Error; err != nil {
+		return model.Role{}, err
+	}
+	return role, nil
+}

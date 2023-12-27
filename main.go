@@ -3,7 +3,6 @@ package main
 import (
 	"auth/api"
 	"auth/config"
-
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	echoSwagger "github.com/swaggo/echo-swagger"

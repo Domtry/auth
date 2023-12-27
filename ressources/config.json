@@ -4,13 +4,18 @@
       "name": "admin",
       "describe": "super user role",
       "permissions": [
-        "create_user", "update_user_profile"]
+        "create_user",
+        "update_user_profile",
+        "view_user_profile",
+        "init_user_password",
+        "delete_user"
+      ]
     },
     {
       "name": "client",
       "describe": "client permission",
       "permissions": [
-        "update_user_profile"
+        "update_user_profile", "view_user_profile"
       ]
     }
   ],

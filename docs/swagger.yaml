@@ -14,12 +14,41 @@ definitions:
     properties:
       email:
         type: string
+      id:
+        type: string
       name:
+        type: string
+      role:
         type: string
       token:
         $ref: '#/definitions/authentications.Token'
+    type: object
+  authentications.InitUserPasswordIn:
+    properties:
+      password:
+        type: string
       user_id:
         type: string
+    required:
+    - password
+    - user_id
+    type: object
+  authentications.RefreshTokenOut:
+    properties:
+      id:
+        type: string
+      token:
+        $ref: '#/definitions/authentications.Token'
+    type: object
+  authentications.ResetPasswordIn:
+    properties:
+      new_password:
+        type: string
+      old_password:
+        type: string
+    required:
+    - new_password
+    - old_password
     type: object
   authentications.Token:
     properties:
@@ -40,6 +69,8 @@ definitions:
         type: string
       id:
         type: string
+      is_available:
+        type: boolean
       is_visible:
         type: boolean
       name:
@@ -62,6 +93,94 @@ definitions:
     - sername
     - username
     type: object
+  users.UserIn:
+    properties:
+      email:
+        type: string
+      name:
+        type: string
+      password:
+        type: string
+      sername:
+        type: string
+      username:
+        type: string
+    required:
+    - email
+    - name
+    - password
+    - sername
+    - username
+    type: object
+  users.UserOut:
+    properties:
+      create_at:
+        type: string
+      email:
+        type: string
+      id:
+        type: string
+      name:
+        type: string
+      role:
+        type: string
+      sername:
+        type: string
+      updated_at:
+        type: string
+      username:
+        type: string
+    required:
+    - email
+    - id
+    - name
+    - role
+    - sername
+    - username
+    type: object
+  utils.HttpResponse-any:
+    properties:
+      code_error:
+        type: integer
+      data: {}
+      message:
+        type: string
+      success:
+        type: boolean
+    type: object
+  utils.HttpResponse-authentications_AuthOut:
+    properties:
+      code_error:
+        type: integer
+      data:
+        $ref: '#/definitions/authentications.AuthOut'
+      message:
+        type: string
+      success:
+        type: boolean
+    type: object
+  utils.HttpResponse-authentications_RefreshTokenOut:
+    properties:
+      code_error:
+        type: integer
+      data:
+        $ref: '#/definitions/authentications.RefreshTokenOut'
+      message:
+        type: string
+      success:
+        type: boolean
+    type: object
+  utils.HttpResponse-users_UserOut:
+    properties:
+      code_error:
+        type: integer
+      data:
+        $ref: '#/definitions/users.UserOut'
+      message:
+        type: string
+      success:
+        type: boolean
+    type: object
 externalDocs:
   description: OpenAPI
   url: https://swagger.io/resources/open-api/
@@ -79,6 +198,35 @@ info:
   title: CMagic Auth
   version: 1.0.0
 paths:
+  /auth/forget_password:
+    put:
+      description: Voir le profil d'un utilisateur
+      produces:
+      - application/json
+      responses: {}
+      summary: Voir le profil d'un utilisateur
+      tags:
+      - Authentications
+  /auth/init_password:
+    put:
+      description: Initialisation du mot de passe utilisateur
+      parameters:
+      - description: Body data
+        in: body
+        name: init_password
+        required: true
+        schema:
+          $ref: '#/definitions/authentications.InitUserPasswordIn'
+      produces:
+      - application/json
+      responses:
+        "202":
+          description: Accepted
+          schema:
+            $ref: '#/definitions/utils.HttpResponse-any'
+      summary: Initialisation du mot de passe utilisateur
+      tags:
+      - Authentications
   /auth/login:
     post:
       description: Authentifier un utlisateur
@@ -95,28 +243,54 @@ paths:
         "201":
           description: Created
           schema:
-            $ref: '#/definitions/authentications.AuthOut'
+            $ref: '#/definitions/utils.HttpResponse-authentications_AuthOut'
       summary: Authentifier un utlisateur
       tags:
       - Authentications
   /auth/me:
     get:
       description: Voir le profil d'un utilisateur
-      parameters:
-      - description: Détails de l'utilisateur
-        in: body
-        name: user
-        required: true
-        schema:
-          $ref: '#/definitions/model.User'
       produces:
       - application/json
       responses:
         "201":
           description: Created
           schema:
-            $ref: '#/definitions/model.User'
+            $ref: '#/definitions/utils.HttpResponse-users_UserOut'
       summary: Voir le profil d'un utilisateur
+      tags:
+      - Authentications
+  /auth/refresh_token:
+    put:
+      description: Rafraichir le token
+      produces:
+      - application/json
+      responses:
+        "202":
+          description: Accepted
+          schema:
+            $ref: '#/definitions/utils.HttpResponse-authentications_RefreshTokenOut'
+      summary: Rafraichir le token
+      tags:
+      - Authentications
+  /auth/reset_password:
+    put:
+      description: Changer de mot de passe
+      parameters:
+      - description: Détails de l'utilisateur
+        in: body
+        name: reset_password
+        required: true
+        schema:
+          $ref: '#/definitions/authentications.ResetPasswordIn'
+      produces:
+      - application/json
+      responses:
+        "202":
+          description: Accepted
+          schema:
+            $ref: '#/definitions/utils.HttpResponse-authentications_AuthOut'
+      summary: Changer de mot de passe
       tags:
       - Authentications
   /users:
@@ -139,20 +313,42 @@ paths:
       - application/json
       description: Crée un nouvel utilisateur avec les détails fournis.
       parameters:
-      - description: Détails de l'utilisateur
+      - description: Body data
         in: body
         name: user
         required: true
         schema:
-          $ref: '#/definitions/model.User'
+          $ref: '#/definitions/users.UserIn'
       produces:
       - application/json
       responses:
         "201":
           description: Created
           schema:
-            $ref: '#/definitions/model.User'
+            $ref: '#/definitions/utils.HttpResponse-users_UserOut'
       summary: Crée un nouvel utilisateur
+      tags:
+      - Users
+    put:
+      consumes:
+      - application/json
+      description: Met à jour un utilisateur en fonction de son ID avec les détails
+        fournis.
+      parameters:
+      - description: Détails de l'utilisateur à mettre à jour
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/users.UserIn'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/utils.HttpResponse-users_UserOut'
+      summary: Met à jour un utilisateur
       tags:
       - Users
   /users/{id}:
@@ -198,20 +394,20 @@ paths:
         in: path
         name: id
         required: true
-        type: integer
-      - description: Détails de l'utilisateur à mettre à jour
+        type: string
+      - description: Body data
         in: body
         name: user
         required: true
         schema:
-          $ref: '#/definitions/model.User'
+          $ref: '#/definitions/users.UserIn'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/model.User'
+            $ref: '#/definitions/utils.HttpResponse-users_UserOut'
       summary: Met à jour un utilisateur
       tags:
       - Users
@@ -254,6 +450,19 @@ paths:
         "204":
           description: Aucun contenu
       summary: Supprimer un rôle d'un utilisateur
+      tags:
+      - Users
+  /users/profile:
+    get:
+      description: view user profile info.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/utils.HttpResponse-users_UserOut'
+      summary: User profile
       tags:
       - Users
 securityDefinitions:

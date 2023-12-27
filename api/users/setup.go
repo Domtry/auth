@@ -11,7 +11,8 @@ import (
 // SetupUser config User
 func SetupUser(apiGroup *echo.Group, db *gorm.DB) {
 	userRepo := repository.NewUserRepository(db)
-	userService := service.NewUserService(userRepo)
+	roleRepo := repository.NewRoleRepository(db)
+	userService := service.NewUserService(userRepo, roleRepo)
 	userHandler := NewUserHandler(userService)
 
 	userGroup := apiGroup.Group("/users")

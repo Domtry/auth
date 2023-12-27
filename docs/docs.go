@@ -24,6 +24,50 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
+        "/auth/forget_password": {
+            "put": {
+                "description": "Voir le profil d'un utilisateur",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Authentications"
+                ],
+                "summary": "Voir le profil d'un utilisateur",
+                "responses": {}
+            }
+        },
+        "/auth/init_password": {
+            "put": {
+                "description": "Initialisation du mot de passe utilisateur",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Authentications"
+                ],
+                "summary": "Initialisation du mot de passe utilisateur",
+                "parameters": [
+                    {
+                        "description": "Body data",
+                        "name": "init_password",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/authentications.InitUserPasswordIn"
+                        }
+                    }
+                ],
+                "responses": {
+                    "202": {
+                        "description": "Accepted",
+                        "schema": {
+                            "$ref": "#/definitions/utils.HttpResponse-any"
+                        }
+                    }
+                }
+            }
+        },
         "/auth/login": {
             "post": {
                 "description": "Authentifier un utlisateur",
@@ -49,7 +93,7 @@ const docTemplate = `{
                     "201": {
                         "description": "Created",
                         "schema": {
-                            "$ref": "#/definitions/authentications.AuthOut"
+                            "$ref": "#/definitions/utils.HttpResponse-authentications_AuthOut"
                         }
                     }
                 }
@@ -65,22 +109,62 @@ const docTemplate = `{
                     "Authentications"
                 ],
                 "summary": "Voir le profil d'un utilisateur",
-                "parameters": [
-                    {
-                        "description": "Détails de l'utilisateur",
-                        "name": "user",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/model.User"
-                        }
-                    }
-                ],
                 "responses": {
                     "201": {
                         "description": "Created",
                         "schema": {
-                            "$ref": "#/definitions/model.User"
+                            "$ref": "#/definitions/utils.HttpResponse-users_UserOut"
+                        }
+                    }
+                }
+            }
+        },
+        "/auth/refresh_token": {
+            "put": {
+                "description": "Rafraichir le token",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Authentications"
+                ],
+                "summary": "Rafraichir le token",
+                "responses": {
+                    "202": {
+                        "description": "Accepted",
+                        "schema": {
+                            "$ref": "#/definitions/utils.HttpResponse-authentications_RefreshTokenOut"
+                        }
+                    }
+                }
+            }
+        },
+        "/auth/reset_password": {
+            "put": {
+                "description": "Changer de mot de passe",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Authentications"
+                ],
+                "summary": "Changer de mot de passe",
+                "parameters": [
+                    {
+                        "description": "Détails de l'utilisateur",
+                        "name": "reset_password",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/authentications.ResetPasswordIn"
+                        }
+                    }
+                ],
+                "responses": {
+                    "202": {
+                        "description": "Accepted",
+                        "schema": {
+                            "$ref": "#/definitions/utils.HttpResponse-authentications_AuthOut"
                         }
                     }
                 }
@@ -108,6 +192,38 @@ const docTemplate = `{
                     }
                 }
             },
+            "put": {
+                "description": "Met à jour un utilisateur en fonction de son ID avec les détails fournis.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Users"
+                ],
+                "summary": "Met à jour un utilisateur",
+                "parameters": [
+                    {
+                        "description": "Détails de l'utilisateur à mettre à jour",
+                        "name": "user",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/users.UserIn"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/utils.HttpResponse-users_UserOut"
+                        }
+                    }
+                }
+            },
             "post": {
                 "description": "Crée un nouvel utilisateur avec les détails fournis.",
                 "consumes": [
@@ -122,12 +238,12 @@ const docTemplate = `{
                 "summary": "Crée un nouvel utilisateur",
                 "parameters": [
                     {
-                        "description": "Détails de l'utilisateur",
+                        "description": "Body data",
                         "name": "user",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/model.User"
+                            "$ref": "#/definitions/users.UserIn"
                         }
                     }
                 ],
@@ -135,7 +251,27 @@ const docTemplate = `{
                     "201": {
                         "description": "Created",
                         "schema": {
-                            "$ref": "#/definitions/model.User"
+                            "$ref": "#/definitions/utils.HttpResponse-users_UserOut"
+                        }
+                    }
+                }
+            }
+        },
+        "/users/profile": {
+            "get": {
+                "description": "view user profile info.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Users"
+                ],
+                "summary": "User profile",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/utils.HttpResponse-users_UserOut"
                         }
                     }
                 }
@@ -183,19 +319,19 @@ const docTemplate = `{
                 "summary": "Met à jour un utilisateur",
                 "parameters": [
                     {
-                        "type": "integer",
+                        "type": "string",
                         "description": "ID de l'utilisateur",
                         "name": "id",
                         "in": "path",
                         "required": true
                     },
                     {
-                        "description": "Détails de l'utilisateur à mettre à jour",
+                        "description": "Body data",
                         "name": "user",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/model.User"
+                            "$ref": "#/definitions/users.UserIn"
                         }
                     }
                 ],
@@ -203,7 +339,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/model.User"
+                            "$ref": "#/definitions/utils.HttpResponse-users_UserOut"
                         }
                     }
                 }
@@ -313,13 +449,57 @@ const docTemplate = `{
                 "email": {
                     "type": "string"
                 },
+                "id": {
+                    "type": "string"
+                },
                 "name": {
+                    "type": "string"
+                },
+                "role": {
                     "type": "string"
                 },
                 "token": {
                     "$ref": "#/definitions/authentications.Token"
+                }
+            }
+        },
+        "authentications.InitUserPasswordIn": {
+            "type": "object",
+            "required": [
+                "password",
+                "user_id"
+            ],
+            "properties": {
+                "password": {
+                    "type": "string"
                 },
                 "user_id": {
+                    "type": "string"
+                }
+            }
+        },
+        "authentications.RefreshTokenOut": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "string"
+                },
+                "token": {
+                    "$ref": "#/definitions/authentications.Token"
+                }
+            }
+        },
+        "authentications.ResetPasswordIn": {
+            "type": "object",
+            "required": [
+                "new_password",
+                "old_password"
+            ],
+            "properties": {
+                "new_password": {
+                    "type": "string"
+                },
+                "old_password": {
                     "type": "string"
                 }
             }
@@ -361,6 +541,9 @@ const docTemplate = `{
                 "id": {
                     "type": "string"
                 },
+                "is_available": {
+                    "type": "boolean"
+                },
                 "is_visible": {
                     "type": "boolean"
                 },
@@ -381,6 +564,136 @@ const docTemplate = `{
                 },
                 "username": {
                     "type": "string"
+                }
+            }
+        },
+        "users.UserIn": {
+            "type": "object",
+            "required": [
+                "email",
+                "name",
+                "password",
+                "sername",
+                "username"
+            ],
+            "properties": {
+                "email": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "password": {
+                    "type": "string"
+                },
+                "sername": {
+                    "type": "string"
+                },
+                "username": {
+                    "type": "string"
+                }
+            }
+        },
+        "users.UserOut": {
+            "type": "object",
+            "required": [
+                "email",
+                "id",
+                "name",
+                "role",
+                "sername",
+                "username"
+            ],
+            "properties": {
+                "create_at": {
+                    "type": "string"
+                },
+                "email": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "role": {
+                    "type": "string"
+                },
+                "sername": {
+                    "type": "string"
+                },
+                "updated_at": {
+                    "type": "string"
+                },
+                "username": {
+                    "type": "string"
+                }
+            }
+        },
+        "utils.HttpResponse-any": {
+            "type": "object",
+            "properties": {
+                "code_error": {
+                    "type": "integer"
+                },
+                "data": {},
+                "message": {
+                    "type": "string"
+                },
+                "success": {
+                    "type": "boolean"
+                }
+            }
+        },
+        "utils.HttpResponse-authentications_AuthOut": {
+            "type": "object",
+            "properties": {
+                "code_error": {
+                    "type": "integer"
+                },
+                "data": {
+                    "$ref": "#/definitions/authentications.AuthOut"
+                },
+                "message": {
+                    "type": "string"
+                },
+                "success": {
+                    "type": "boolean"
+                }
+            }
+        },
+        "utils.HttpResponse-authentications_RefreshTokenOut": {
+            "type": "object",
+            "properties": {
+                "code_error": {
+                    "type": "integer"
+                },
+                "data": {
+                    "$ref": "#/definitions/authentications.RefreshTokenOut"
+                },
+                "message": {
+                    "type": "string"
+                },
+                "success": {
+                    "type": "boolean"
+                }
+            }
+        },
+        "utils.HttpResponse-users_UserOut": {
+            "type": "object",
+            "properties": {
+                "code_error": {
+                    "type": "integer"
+                },
+                "data": {
+                    "$ref": "#/definitions/users.UserOut"
+                },
+                "message": {
+                    "type": "string"
+                },
+                "success": {
+                    "type": "boolean"
                 }
             }
         }

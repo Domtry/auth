@@ -10,10 +10,92 @@ Content-Type: application/json
 
 GET http://localhost:8000/api/v1/users
 Content-Type: application/json
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiYWRtaW4iLCJzb3VyY2UiOiJhY2Nlc3NfdG9rZW4iLCJleHAiOjE3MDM1MDI3NDMsImp0aSI6ImRkOTE2MzFkLWU0MDktNGViYy05Mzk2LTdlZDUzNzBmNjMxZSIsInN1YiI6Im5vcmVwbHlAY21hZ2ljLmNvbSJ9.2diPpcOmTwJMgUfhbDuJilUkFaloYpok0kqoOGl3S68
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiYWRtaW4iLCJzb3VyY2UiOiJhY2Nlc3NfdG9rZW4iLCJleHAiOjE3MDM2NzkxNjcsImp0aSI6IjMwZTEwOWM2LThmM2QtNGY1NS04YjZhLTUyNTQ3NzA5OGVmYSIsInN1YiI6Im5vcmVwbHlAY21hZ2ljLmNvbSJ9.gtE4Z1u29A3CwrV2mBqdORWScFlGxAD1PWiAQYZzzIE
 
 ###
 
 GET http://localhost:8000/api/v1/auth/me
 Content-Type: application/json
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiYWRtaW4iLCJzb3VyY2UiOiJhY2Nlc3NfdG9rZW4iLCJleHAiOjE3MDM1MDI3NDMsImp0aSI6ImRkOTE2MzFkLWU0MDktNGViYy05Mzk2LTdlZDUzNzBmNjMxZSIsInN1YiI6Im5vcmVwbHlAY21hZ2ljLmNvbSJ9.2diPpcOmTwJMgUfhbDuJilUkFaloYpok0kqoOGl3S68
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiY2xpZW50Iiwic291cmNlIjoiYWNjZXNzX3Rva2VuIiwiZXhwIjoxNzAzNjE2NjE4LCJqdGkiOiIyNDM2ODNiZC1lYzJhLTQwNWItOWQ5ZC1mNjk5NTE5OGEzNmIiLCJzdWIiOiJkb2Zmb3VmYXllQGdtYWlsLmNvbSJ9.8r2jEZ7sRevi-K2JIzMvHrVHllVI00-FUmsgsfVtedo
+
+###
+
+PUT http://localhost:8000/api/v1/auth/refresh_token
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiY2xpZW50Iiwic291cmNlIjoicmVmcmVzaF90b2tlbiIsImV4cCI6MTcwMzYzNDYxOCwianRpIjoiMjQzNjgzYmQtZWMyYS00MDViLTlkOWQtZjY5OTUxOThhMzZiIiwic3ViIjoiZG9mZm91ZmF5ZUBnbWFpbC5jb20ifQ.xGuRrEoo4osGiqCfkImNTPuT0Gc0pzrgenP0QoVIt7A
+
+###
+
+PUT http://localhost:8000/api/v1/auth/reset_password
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiY2xpZW50Iiwic291cmNlIjoiYWNjZXNzX3Rva2VuIiwiZXhwIjoxNzAzNjE2NjE4LCJqdGkiOiIyNDM2ODNiZC1lYzJhLTQwNWItOWQ5ZC1mNjk5NTE5OGEzNmIiLCJzdWIiOiJkb2Zmb3VmYXllQGdtYWlsLmNvbSJ9.8r2jEZ7sRevi-K2JIzMvHrVHllVI00-FUmsgsfVtedo
+
+{
+  "old_password": "Dycode@123456",
+  "new_password": "Dycode"
+}
+###
+
+PUT http://localhost:8000/api/v1/auth/init_password
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiYWRtaW4iLCJzb3VyY2UiOiJhY2Nlc3NfdG9rZW4iLCJleHAiOjE3MDM2MTY5NjMsImp0aSI6IjMwZTEwOWM2LThmM2QtNGY1NS04YjZhLTUyNTQ3NzA5OGVmYSIsInN1YiI6Im5vcmVwbHlAY21hZ2ljLmNvbSJ9.5YjmH2ifcT6GVxaJzClEPFhBkzuoSlKc0t_fAMyDUqE
+
+{
+  "user_id": "243683bd-ec2a-405b-9d9d-f6995198a36b",
+  "password": "Devo@123456"
+}
+###
+
+POST http://localhost:8000/api/v1/users
+Content-Type: application/json
+
+{
+  "name": "Faye",
+  "email": "doffoufaye@gmail.com",
+  "sername": "Doffou Dimitri",
+  "username": "dimitri.faye",
+  "password": "Devo@123456"
+}
+
+###
+GET http://localhost:8000/api/v1/users/profile
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiYWRtaW4iLCJzb3VyY2UiOiJhY2Nlc3NfdG9rZW4iLCJleHAiOjE3MDM2NzE5MjgsImp0aSI6IjMwZTEwOWM2LThmM2QtNGY1NS04YjZhLTUyNTQ3NzA5OGVmYSIsInN1YiI6Im5vcmVwbHlAY21hZ2ljLmNvbSJ9.qPrkXbmmqi6W_vRWLF9Lbi34y-QV-f8noF63V2eYSC4
+
+###
+
+PUT http://localhost:8000/api/v1/users
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiY2xpZW50Iiwic291cmNlIjoiYWNjZXNzX3Rva2VuIiwiZXhwIjoxNzAzNjU2MDMxLCJqdGkiOiIyNDM2ODNiZC1lYzJhLTQwNWItOWQ5ZC1mNjk5NTE5OGEzNmIiLCJzdWIiOiJkb2Zmb3VmYXllQGdtYWlsLmNvbSJ9.GS5ratE8DrSvHMHtTu14b8Se5LCdP3TVwhY_U_6i5fE
+
+{
+  "name": "Kouassi",
+  "email": "doffoufaye@gmail.com",
+  "sername": "Serge pacome"
+}
+
+###
+GET http://localhost:8000/api/v1/users/243683bd-ec2a-405b-9d9d-f6995198a36b
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiYWRtaW4iLCJzb3VyY2UiOiJhY2Nlc3NfdG9rZW4iLCJleHAiOjE3MDM2NjAwMDMsImp0aSI6IjMwZTEwOWM2LThmM2QtNGY1NS04YjZhLTUyNTQ3NzA5OGVmYSIsInN1YiI6Im5vcmVwbHlAY21hZ2ljLmNvbSJ9.LhoxIEW1fyY9hs_mRnUt30IdfAcIECNYsWI2-PP86pI
+
+###
+
+###
+PUT http://localhost:8000/api/v1/users/243683bd-ec2a-405b-9d9d-f6995198a36b
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiYWRtaW4iLCJzb3VyY2UiOiJhY2Nlc3NfdG9rZW4iLCJleHAiOjE3MDM2NjAwMDMsImp0aSI6IjMwZTEwOWM2LThmM2QtNGY1NS04YjZhLTUyNTQ3NzA5OGVmYSIsInN1YiI6Im5vcmVwbHlAY21hZ2ljLmNvbSJ9.LhoxIEW1fyY9hs_mRnUt30IdfAcIECNYsWI2-PP86pI
+
+{
+  "name": "Fayé",
+  "email": "dimitri.faye@devolution.africa",
+  "sername": "Doffou Dimitri"
+}
+###
+
+###
+DELETE http://localhost:8000/api/v1/users/243683bd-ec2a-405b-9d9d-f6995198a36b
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiYWRtaW4iLCJzb3VyY2UiOiJhY2Nlc3NfdG9rZW4iLCJleHAiOjE3MDM2NzkxNjcsImp0aSI6IjMwZTEwOWM2LThmM2QtNGY1NS04YjZhLTUyNTQ3NzA5OGVmYSIsInN1YiI6Im5vcmVwbHlAY21hZ2ljLmNvbSJ9.gtE4Z1u29A3CwrV2mBqdORWScFlGxAD1PWiAQYZzzIE
+
+###
