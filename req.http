@@ -3,7 +3,7 @@ Content-Type: application/json
 
 {
   "username": "admin",
-  "password": "Dycode@123456"
+  "password": "thesecret"
 }
 
 ###
@@ -31,8 +31,8 @@ Content-Type: application/json
 Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiY2xpZW50Iiwic291cmNlIjoiYWNjZXNzX3Rva2VuIiwiZXhwIjoxNzAzNjE2NjE4LCJqdGkiOiIyNDM2ODNiZC1lYzJhLTQwNWItOWQ5ZC1mNjk5NTE5OGEzNmIiLCJzdWIiOiJkb2Zmb3VmYXllQGdtYWlsLmNvbSJ9.8r2jEZ7sRevi-K2JIzMvHrVHllVI00-FUmsgsfVtedo
 
 {
-  "old_password": "Dycode@123456",
-  "new_password": "Dycode"
+  "old_password": "last_password",
+  "new_password": "thesecret"
 }
 ###
 
@@ -42,7 +42,7 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiYWRtaW4iL
 
 {
   "user_id": "243683bd-ec2a-405b-9d9d-f6995198a36b",
-  "password": "Devo@123456"
+  "password": "thesecret"
 }
 ###
 
@@ -50,11 +50,11 @@ POST http://localhost:8000/api/v1/users
 Content-Type: application/json
 
 {
-  "name": "Faye",
-  "email": "doffoufaye@gmail.com",
-  "sername": "Doffou Dimitri",
-  "username": "dimitri.faye",
-  "password": "Devo@123456"
+  "name": "name",
+  "email": "noreply@gmail.com",
+  "sername": "sername",
+  "username": "user_name",
+  "password": "the_secret"
 }
 
 ###
@@ -70,7 +70,7 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiY2xpZW50I
 
 {
   "name": "Kouassi",
-  "email": "doffoufaye@gmail.com",
+  "email": "noreply@gmail.com",
   "sername": "Serge pacome"
 }
 
@@ -87,9 +87,9 @@ Content-Type: application/json
 Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiYWRtaW4iLCJzb3VyY2UiOiJhY2Nlc3NfdG9rZW4iLCJleHAiOjE3MDM2NjAwMDMsImp0aSI6IjMwZTEwOWM2LThmM2QtNGY1NS04YjZhLTUyNTQ3NzA5OGVmYSIsInN1YiI6Im5vcmVwbHlAY21hZ2ljLmNvbSJ9.LhoxIEW1fyY9hs_mRnUt30IdfAcIECNYsWI2-PP86pI
 
 {
-  "name": "Fayé",
-  "email": "dimitri.faye@devolution.africa",
-  "sername": "Doffou Dimitri"
+  "name": "name",
+  "email": "noreply@gmail.com",
+  "sername": "sername"
 }
 ###
 
