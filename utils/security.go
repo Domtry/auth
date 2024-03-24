@@ -6,6 +6,7 @@ import (
 	"github.com/dgrijalva/jwt-go"
 	"github.com/labstack/echo/v4"
 	"golang.org/x/crypto/bcrypt"
+	"math/rand"
 	"strings"
 )
 
@@ -48,6 +49,10 @@ func ParseToken(tokenString string) (claims *model.Claims, err error) {
 func VerifyPermission(ctx echo.Context, value string) error {
 	roleCtx := ctx.Get("roles")
 
+	if roleCtx == nil {
+		return fmt.Errorf("User has not permission")
+	}
+
 	roles := roleCtx.(JsonRoleItem)
 	hasPermit := false
 
@@ -64,4 +69,14 @@ func VerifyPermission(ctx echo.Context, value string) error {
 	}
 
 	return nil
+}
+
+func OtpGenerator(n int) string {
+	var number = []byte("0123456789")
+	b := make([]byte, n)
+	for i := range b {
+		b[i] = number[rand.Intn(len(number))]
+	}
+
+	return string(b)
 }

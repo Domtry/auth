@@ -1,0 +1,32 @@
+version: '3'
+services:
+  master:
+    build:
+      context: ./
+      dockerfile: dockerfile
+    container_name: auth-service
+    ports:
+      - 3003:8000
+    environment:
+      - DB_PROVIDER = pg
+      - DB_HOST = localhost
+      - DB_PORT = 5433
+      - DB_NAME = cmagic_auth_db_test
+      - DB_USER = dycode_db_user
+      - DB_PASSWORD = DyCode123456
+    depends_on:
+      - db
+  db:
+    image: postgres:12-alpine
+    container_name: postgresdb
+    ports:
+      - 5454:5432
+    networks:
+      - default
+    restart: always
+    environment:
+      - POSTGRES_USER=dycode_db_user
+      - POSTGRES_DB=cmagic_auth_db_test
+      - POSTGRES_PASSWORD=DyCode123456
+    volumes:
+      - ./postgresdb:/var/lib/postgresql/data

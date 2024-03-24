@@ -8,4 +8,6 @@ type User struct {
 	RoleId   string `json:"role_id" validate:"required,uuid4"`
 	Sername  string `json:"sername" validate:"required"`
 	Password string `json:"password" validate:"required"`
+	UseOTP   bool   `json:"use_otp"`
+	Otps     []Otp  `json:"otps" gorm:"foreignKey:UserId"`
 }

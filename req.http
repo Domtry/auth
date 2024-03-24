@@ -8,7 +8,16 @@ Content-Type: application/json
 
 ###
 
-GET http://localhost:8000/api/v1/users
+POST http://localhost:8000/api/v1/auth/two_factor_verification
+Content-Type: application/json
+
+{
+  "session_id": "f3a1001d-2150-4258-b347-08f4188e7bb7",
+  "otp": "506041"
+}
+
+###
+GET http://localhost:3003/api/v1/users
 Content-Type: application/json
 Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiYWRtaW4iLCJzb3VyY2UiOiJhY2Nlc3NfdG9rZW4iLCJleHAiOjE3MDM2NzkxNjcsImp0aSI6IjMwZTEwOWM2LThmM2QtNGY1NS04YjZhLTUyNTQ3NzA5OGVmYSIsInN1YiI6Im5vcmVwbHlAY21hZ2ljLmNvbSJ9.gtE4Z1u29A3CwrV2mBqdORWScFlGxAD1PWiAQYZzzIE
 
@@ -48,12 +57,13 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiYWRtaW4iL
 
 POST http://localhost:8000/api/v1/users
 Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiYWRtaW4iLCJzb3VyY2UiOiJhY2Nlc3NfdG9rZW4iLCJleHAiOjE3MDQ3NzUzMDEsImp0aSI6IjMwZTEwOWM2LThmM2QtNGY1NS04YjZhLTUyNTQ3NzA5OGVmYSIsInN1YiI6Im5vcmVwbHlAY21hZ2ljLmNvbSJ9.SpB9O-vMmZkDBXSvznCm_-Y4s4nq0XxZ8rpmYQ3RSSM
 
 {
   "name": "Faye",
   "email": "doffoufaye@gmail.com",
   "sername": "Doffou Dimitri",
-  "username": "dimitri.faye",
+  "username": "0777865857",
   "password": "Devo@123456"
 }
 

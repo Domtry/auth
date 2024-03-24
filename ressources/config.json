@@ -15,7 +15,8 @@
       "name": "client",
       "describe": "client permission",
       "permissions": [
-        "update_user_profile", "view_user_profile"
+        "update_user_profile",
+        "view_user_profile"
       ]
     }
   ],

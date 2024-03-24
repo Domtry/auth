@@ -3,6 +3,7 @@ package repository
 import (
 	"auth/model"
 	"fmt"
+	"github.com/google/uuid"
 	"log"
 	"time"
 
@@ -44,13 +45,12 @@ func (r *UserRepository) GetUserById(id string) (model.User, error) {
 
 // CreateUser crée un nouvel utilisateur dans la base de données
 func (r *UserRepository) CreateUser(newUser model.User) (model.User, error) {
-	// Générez la date actuelle pour les champs créés et modifiés
-	currentTime := time.Now()
-	newUser.CreatedAt = currentTime
-	newUser.UpdatedAt = currentTime
+
+	newUser.Id = uuid.New().String()
+	newUser.CreatedAt = time.Now()
 
 	// Insertion dans la base de données
-	if err := r.db.Create(&newUser).Error; err != nil {
+	if err := r.db.Model(model.User{}).Create(&newUser).Error; err != nil {
 		return model.User{}, err
 	}
 

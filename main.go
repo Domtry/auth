@@ -10,7 +10,7 @@ import (
 
 // @title           CMagic Auth
 // @version         1.0.0
-// @description     Service d'authentification.
+// @description     Service authentication.
 // @termsOfService  http://swagger.io/terms/
 
 // @contact.name   API Support

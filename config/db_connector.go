@@ -43,6 +43,7 @@ func CreateUpdateTable(db *gorm.DB) error {
 	return db.AutoMigrate(
 		&model.Role{},
 		&model.User{},
+		&model.Otp{},
 		&model.Permission{},
 		&model.RolePermission{},
 	)
@@ -52,6 +53,7 @@ func DropTable(db *gorm.DB) error {
 	return db.Migrator().DropTable(
 		&model.User{},
 		&model.Role{},
+		&model.Otp{},
 		&model.Permission{},
 		&model.RolePermission{},
 	)

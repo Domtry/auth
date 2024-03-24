@@ -26,7 +26,7 @@ func LoadPermissionByRoleName(roleName string) JsonRoleItem {
 	defer jsonFile.Close()
 
 	byteValue, _ := ioutil.ReadAll(jsonFile)
-	err = json.Unmarshal([]byte(byteValue), &roles)
+	err = json.Unmarshal(byteValue, &roles)
 	if err != nil {
 	}
 

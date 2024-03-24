@@ -7,6 +7,7 @@ type Authentication struct {
 	Email  string `json:"email"`
 	Name   string `json:"name"`
 	Role   string `json:"role"`
+	UseOTP bool   `json:"use_otp"`
 	Token  Token  `json:"token"`
 }
 

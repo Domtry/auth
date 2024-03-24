@@ -96,6 +96,7 @@ func (s *UserService) CreateUser(newUser User) (model.User, error) {
 		Sername:  newUser.Sername,
 		Username: newUser.Username,
 		Password: hashPassword,
+		UseOTP:   false,
 	}
 
 	userResponse, err := s.userRepo.CreateUser(userModel)

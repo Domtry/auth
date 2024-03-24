@@ -28,7 +28,7 @@ func NewAuthenticationHandler(authService *service.AuthenticationService) *Authe
 // @Description Authentifier un utlisateur
 // @Tags Authentications
 // @Param user body AuthIn true "Détails de l'utilisateur"
-// @Success 201 {object} utils.HttpResponse[AuthOut]
+// @Success 201 {object} utils.HttpResponse[AuthResponse]
 // @Produce json
 // @Router /auth/login [post]
 func (h *AuthenticationHandler) LoginHandler(ctx echo.Context) error {
@@ -67,9 +67,79 @@ func (h *AuthenticationHandler) LoginHandler(ctx echo.Context) error {
 		return ctx.JSON(http.StatusBadRequest, jsonResponse)
 	}
 
-	authResponse, err := h.authService.Login(payload.Username, payload.Password)
+	modeAuth, err := h.authService.GetAuthMode(payload.Username)
 	if err != nil {
-		jsonResponse := utils.HttpResponse[any]{
+		jsonResponse := utils.HttpResponse[map[string]interface{}]{
+			Message:   "Nom d'utilisateur ou mot de passe incorrect",
+			Success:   false,
+			CodeError: http.StatusBadRequest,
+			Data: map[string]interface{}{
+				"details": "Nom d'utilisateur ou mot de passe incorrect",
+			},
+		}
+
+		return ctx.JSON(http.StatusBadRequest, jsonResponse)
+	}
+
+	var jsonResponse any
+	var errObj any
+
+	switch modeAuth {
+	case "two_factor_auth":
+		authResponse, errAuth := h.authService.AuthByOtp(payload.Username, payload.Password)
+		if errAuth != nil {
+			errObj = errAuth
+		}
+
+		jsonResponse = utils.HttpResponse[AuthResponse[service.OtpResponse]]{
+			Message:   "Un code OTP à été envoyé ce sur numéro",
+			Success:   true,
+			CodeError: http.StatusOK,
+			Data: AuthResponse[service.OtpResponse]{
+				Username:        payload.Username,
+				IsAuthenticated: false,
+				UseOTP:          true,
+				Content: service.OtpResponse{
+					SessionId: authResponse.SessionId,
+					Code:      authResponse.Code,
+					IsUsed:    authResponse.IsUsed,
+					ExpireHas: authResponse.ExpireHas,
+				},
+			},
+		}
+		break
+	case "basic_auth":
+		authResponse, errAuth := h.authService.Login(payload.Username, payload.Password)
+		if errAuth != nil {
+			errObj = errAuth
+		}
+
+		jsonResponse = utils.HttpResponse[AuthResponse[AuthOut]]{
+			Message:   "Connexion succès",
+			Success:   true,
+			CodeError: http.StatusOK,
+			Data: AuthResponse[AuthOut]{
+				Username:        payload.Username,
+				IsAuthenticated: true,
+				UseOTP:          false,
+				Content: AuthOut{
+					Id:    authResponse.UserId,
+					Name:  authResponse.Name,
+					Email: authResponse.Email,
+					Role:  authResponse.Role,
+					Token: Token{
+						AccessToken:  authResponse.Token.AccessToken,
+						RefreshToken: authResponse.Token.RefreshToken,
+						ExpiresAt:    authResponse.Token.ExpiresAt,
+					},
+				},
+			},
+		}
+		break
+	}
+
+	if errObj != nil {
+		jsonResponse = utils.HttpResponse[any]{
 			Message:   err.Error(),
 			Success:   false,
 			CodeError: http.StatusBadRequest,
@@ -78,23 +148,90 @@ func (h *AuthenticationHandler) LoginHandler(ctx echo.Context) error {
 		return ctx.JSON(http.StatusBadRequest, jsonResponse)
 	}
 
-	jsonResponse := utils.HttpResponse[AuthOut]{
+	return ctx.JSON(http.StatusOK, jsonResponse)
+}
+
+// VerifyTwoFactorCredentialHandler authentifier un utlisateur
+// @Summary Authentifier un utlisateur
+// @Description Authentifier un utlisateur
+// @Tags Authentications
+// @Param user body AuthIn true "Détails de l'utilisateur"
+// @Success 201 {object} utils.HttpResponse[AuthOut]
+// @Produce json
+// @Router /auth/login [post]
+func (h *AuthenticationHandler) VerifyTwoFactorCredentialHandler(ctx echo.Context) error {
+
+	var payload TwoFactorIn
+
+	if err := ctx.Bind(&payload); err != nil {
+		jsonResponse := utils.HttpResponse[any]{
+			Message:   "Données JSON invalides",
+			Success:   false,
+			CodeError: http.StatusBadRequest,
+			Data:      nil,
+		}
+		return ctx.JSON(http.StatusBadRequest, jsonResponse)
+	}
+
+	// Validation des données
+	validate := validator.New()
+	if err := validate.Struct(payload); err != nil {
+		var validationErrors []string
+
+		// Parcourez les erreurs de validation
+		for _, err := range err.(validator.ValidationErrors) {
+			validationErrors = append(validationErrors, formatValidationError(err))
+		}
+
+		jsonResponse := utils.HttpResponse[map[string]interface{}]{
+			Message:   "Validation failed",
+			Success:   false,
+			CodeError: http.StatusBadRequest,
+			Data: map[string]interface{}{
+				"details": validationErrors,
+			},
+		}
+
+		return ctx.JSON(http.StatusBadRequest, jsonResponse)
+	}
+
+	response, err := h.authService.VerifyOtpCode(payload.SessionId, payload.Otp)
+	if err != nil {
+		jsonResponse := utils.HttpResponse[map[string]interface{}]{
+			Message:   err.Error(),
+			Success:   false,
+			CodeError: http.StatusBadRequest,
+			Data:      nil,
+		}
+
+		return ctx.JSON(http.StatusBadRequest, jsonResponse)
+	}
+
+	userInfo, _ := h.authService.UserProfil(response.UserId)
+
+	jsonResponse := utils.HttpResponse[AuthResponse[AuthOut]]{
 		Message:   "Connexion succès",
 		Success:   true,
 		CodeError: http.StatusOK,
-		Data: AuthOut{
-			Id:    authResponse.UserId,
-			Name:  authResponse.Name,
-			Email: authResponse.Email,
-			Role:  authResponse.Role,
-			Token: Token{
-				AccessToken:  authResponse.Token.AccessToken,
-				RefreshToken: authResponse.Token.RefreshToken,
-				ExpiresAt:    authResponse.Token.ExpiresAt,
+		Data: AuthResponse[AuthOut]{
+			Username:        userInfo.Username,
+			IsAuthenticated: true,
+			UseOTP:          true,
+			Content: AuthOut{
+				Id:    response.UserId,
+				Name:  response.Name,
+				Email: response.Email,
+				Role:  response.Role,
+				Token: Token{
+					AccessToken:  response.Token.AccessToken,
+					RefreshToken: response.Token.RefreshToken,
+					ExpiresAt:    response.Token.ExpiresAt,
+				},
 			},
 		},
 	}
-	return ctx.JSON(http.StatusOK, jsonResponse)
+
+	return ctx.JSON(http.StatusAccepted, jsonResponse)
 }
 
 // UserProfilHandler Voir le profil d'un utilisateur

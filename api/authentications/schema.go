@@ -10,9 +10,21 @@ type AuthOut struct {
 	Token Token  `json:"token"`
 }
 
+type AuthResponse[T any] struct {
+	Username        string `json:"username"`
+	IsAuthenticated bool   `json:"is_authenticated"`
+	UseOTP          bool   `json:"use_otp"`
+	Content         T      `json:"content"`
+}
+
 type AuthIn struct {
 	Username string `json:"username" validate:"required"`
 	Password string `json:"password" validate:"required"`
+}
+
+type TwoFactorIn struct {
+	SessionId string `json:"session_id"`
+	Otp       string `json:"otp"`
 }
 
 type RefreshTokenOut struct {

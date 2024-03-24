@@ -188,6 +188,7 @@ func (h *UserHandler) CreateUserHandler(ctx echo.Context) error {
 
 	var payload UserIn
 
+	/** Verify user permission
 	err := utils.VerifyPermission(ctx, "create_user")
 	if err != nil {
 		jsonResponse := utils.HttpResponse[any]{
@@ -198,6 +199,7 @@ func (h *UserHandler) CreateUserHandler(ctx echo.Context) error {
 		}
 		return ctx.JSON(http.StatusBadRequest, jsonResponse)
 	}
+	*/
 
 	if err := ctx.Bind(&payload); err != nil {
 		jsonResponse := utils.HttpResponse[any]{

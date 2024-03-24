@@ -11,7 +11,8 @@ import (
 func SetupAuthentication(apiGroup *echo.Group, db *gorm.DB) {
 	userRepo := repository.NewUserRepository(db)
 	roleRepo := repository.NewRoleRepository(db)
-	userService := service.NewAuthenticationService(userRepo, roleRepo)
+	otpRepo := repository.NewOtpRepository(db)
+	userService := service.NewAuthenticationService(userRepo, roleRepo, otpRepo)
 	userHandler := NewAuthenticationHandler(userService)
 
 	authGroup := apiGroup.Group("/auth")

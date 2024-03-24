@@ -1,6 +1,6 @@
 DB_PROVIDER: pg
 DB_HOST: localhost
-DB_PORT: 5433
+DB_PORT: 5432
 DB_NAME: cmagic_auth_db_test
-DB_USER: dycode_db_user
+DB_USER: domtry
 DB_PASSWORD: DyCode123456
